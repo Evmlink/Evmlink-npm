@@ -1,24 +1,23 @@
 import _sodium from "libsodium-wrappers-sumo";
-var tou8 = require('buffer-to-uint8array');
 import Web3 from "web3";
 import CryptoJS from 'crypto-js'
 
 const DEFAULT_PASSWORDLENGTH = 4;
 
 const randomAccount = async () => {
-  var _w = new Web3();
+  const _w = new Web3();
   return _w.eth.accounts.create();
 }
 
 const seedToAccount = async (seed:string) => {
-  var _w = new Web3();
+  const _w = new Web3();
   return _w.eth.accounts.privateKeyToAccount(seed);
 }
 
 const aesEncrypt = (message:any, key:any) => {
-  var iv = CryptoJS.enc.Utf8.parse(key);
+  const iv = CryptoJS.enc.Utf8.parse(key);
   key = CryptoJS.enc.Utf8.parse(key);
-  var encrypted = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(JSON.stringify(message)),key, {
+  const encrypted = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(JSON.stringify(message)),key, {
       keySize: 128 / 8,
       iv: iv,
       mode: CryptoJS.mode.CBC,
@@ -28,22 +27,22 @@ const aesEncrypt = (message:any, key:any) => {
 }
 
 const decryptByDES = (ciphertext:any, key:any) => {
-  var iv = CryptoJS.enc.Utf8.parse(key);
+  const iv = CryptoJS.enc.Utf8.parse(key);
   key = CryptoJS.enc.Utf8.parse(key);
   ciphertext=Buffer.from(ciphertext,"base64").toString()
-  var decrypted = CryptoJS.AES.decrypt(ciphertext, key, {
+  const decrypted = CryptoJS.AES.decrypt(ciphertext, key, {
     keySize: 128 / 8,
     iv: iv,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7
 });
-  var ret = (decrypted.toString(CryptoJS.enc.Utf8)).split('"');
+  const ret = (decrypted.toString(CryptoJS.enc.Utf8)).split('"');
   return ret[1]
 }
 
 const aesCreate = async (msg:any) => {
-    var seed = await ranStr(DEFAULT_PASSWORDLENGTH);
-    var ret =  await aesEncrypt(
+    const seed = await ranStr(DEFAULT_PASSWORDLENGTH);
+    const ret =  await aesEncrypt(
       msg,
       seed
     )
@@ -55,8 +54,8 @@ const aesCreate = async (msg:any) => {
 
 const urlEncode = (data:any) =>
 {
-  var str =  ''
-  for (var i = 0 ; i < Object.keys(data).length ; i ++)
+  let str =  ''
+  for (let i = 0 ; i < Object.keys(data).length ; i ++)
   {
     str+=data[Object.keys(data)[i]]+"/";
   }
@@ -66,18 +65,18 @@ const urlEncode = (data:any) =>
 
 const urlDecode = (data:string,origin:string) =>
 {
-  var obj = {
+  let obj = {
     isEncrypt:true,
     privateKey:''
   };
-  var param = data.split(origin);
+  const param = data.split(origin);
   if(param.length>1)
   {
-    var _p = param[1].split("/");
+    const _p = param[1].split("/");
     if(_p.length>0)
     {
-      var msg = _p[1];
-      var key = _p[2];
+      const msg = _p[1];
+      const key = _p[2];
       if(msg.length>0 && key.length)
       {
         //have encrypt . make ecrypt
@@ -122,8 +121,8 @@ export class EvmLink {
 
   public static async create(_path:any,_origin:any,_isEncrypt:boolean): Promise<EvmLink> {
     const link = new URL(_path, _origin);
-    var _w = await randomAccount()
-    var hashData = {
+    const _w = await randomAccount()
+    const hashData = {
       isEncrypt : _isEncrypt,
       data : {}
     }
@@ -143,8 +142,8 @@ export class EvmLink {
 
 
   public static async fromUrl(url: URL): Promise<EvmLink> {
-    var dec = urlDecode(url.href,url.origin);
-    var keypair ;
+    const dec = urlDecode(url.href,url.origin);
+    let keypair ;
     try{
       keypair = seedToAccount(dec.privateKey);
     }catch(e)

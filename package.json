@@ -1,5 +1,5 @@
 {
-  "name": "@evmlink",
+  "name": "@evmlink/api",
   "version": "0.0.1",
   "description": "EVM-base light wallet",
   "main": "dist/index.js",
@@ -14,7 +14,6 @@
   "author": "evmlink",
   "license": "LicenseRef-LICENSE",
   "dependencies": {
-    "buffer-to-uint8array": "^1.1.0",
     "crypto-js": "^4.1.1",
     "libsodium": "^0.7.11",
     "libsodium-wrappers-sumo": "^0.7.11",
@@ -42,7 +41,7 @@
   "keywords": [
     "crypto",
     "solana",
-    "tiplink",
+    "evmlink",
     "wallet",
     "airdrop"
   ],

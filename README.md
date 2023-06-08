@@ -18,7 +18,7 @@ EvmLink is a lightweight wallet designed to make transferring digital assets as 
 
 # Basic Installation instructions
 ```bash
-npm install @evmlink
+npm install @evmlink/api
 ```
 Import Instructions
 ```js

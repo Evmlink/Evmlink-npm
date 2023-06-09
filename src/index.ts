@@ -141,7 +141,7 @@ export class EvmLink {
   }
 
 
-  public static async fromUrl(url: URL): Promise<EvmLink> {
+  public static async fromUrl(url: URL): Promise<any> {
     const dec = urlDecode(url.href,url.origin);
     let keypair ;
     try{
@@ -151,7 +151,7 @@ export class EvmLink {
       console.log(e)
     }
     const evmlink = new EvmLink(url, keypair);
-    return evmlink;
+    return keypair;
   }
 
   public static async fromLink(link: string): Promise<EvmLink> {

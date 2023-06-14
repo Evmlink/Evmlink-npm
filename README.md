@@ -32,6 +32,14 @@ EvmLink.create("/","http://192.168.1.103:8080/",true,137,"Happy Birthday !").the
   return evmlink;
 });
 ```
+- create :
+  - {path :: string}
+  - {origin :: sting}
+  - {encryption  :: bool}
+  - {chainId  :: uint}
+  - {message  :: string}
+
+
 ```js
 const ep = 'http://192.168.1.103:8080/137/V3M5bnAvUkZ3YVdYNGMxaGQyUUlpbHd4U2ppYXV1bXhXdURVdG54bHVSTXh1U2NJK2JWVTc4bThrczJUY3UxTWZQdlNxTjVaTzhkYkJrbWI3dE8rK2o5dWo3cUlpT243UHU0RkhSY29rWFE9/3413/SGFwcHkgQmlydGhkYXkgIQ==/';
 EVMLink.fromLink(ep).then(evmlink => {

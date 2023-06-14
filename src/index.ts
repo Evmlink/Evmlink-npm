@@ -1,15 +1,14 @@
-import _sodium from "libsodium-wrappers-sumo";
 import Web3 from "web3";
 import CryptoJS from 'crypto-js'
 
-const DEFAULT_PASSWORDLENGTH = 6;
+const DEFAULT_PASSWORDLENGTH = 4;
 
 const randomAccount = async () => {
   const _w = new Web3();
   return _w.eth.accounts.create();
 }
 
-const seedToAccount = async (seed:string) => {
+const seedToAccount = (seed:string) => {
   const _w = new Web3();
   return _w.eth.accounts.privateKeyToAccount(seed);
 }
@@ -51,46 +50,78 @@ const aesCreate = async (msg:any) => {
       "key":seed
     }
 }
+/**
+ * The rules of Url :
+ * {origin}/{path}/{chainID}/{secretKey}/{Password}/{Message}
+ */
 
-const urlEncode = (data:any) =>
+const urlEncode = (data:any,msg:any) =>
 {
   let str =  ''
   for (let i = 0 ; i < Object.keys(data).length ; i ++)
   {
     str+=data[Object.keys(data)[i]]+"/";
   }
+  str+=msg+"/";
   return str;
 }
 
 
-const urlDecode = (data:string,origin:string) =>
+const urlDecode = (pathname:string) =>
 {
   let obj = {
     isEncrypt:true,
-    privateKey:''
+    privateKey:'',
+    chainId:0,
+    message:""
   };
-  const param = data.split(origin);
-  if(param.length>1)
+  const param = pathname;
+  if(pathname.length>1)
   {
-    const _p = param[1].split("/");
+    const _p = param.split("/");
+    // console.log(_p)
     if(_p.length>0)
     {
-      const msg = _p[2];
-      const key = _p[3];
-      // console.log(msg,key)
-      if(msg.length>0 && key.length>0)
+      let chain = 0;
+      let sec = "";
+      let key = "";
+      let msg = "";
+      if(_p.length>2)
+      {
+        chain = Number(_p[1]);
+      }
+      if(_p.length>3)
+      {
+        sec = _p[2];
+      }
+      if(_p.length>=4)
+      {
+        key = _p[3];
+      }
+      if(_p.length>5)
+      {
+        msg = _p[4];
+      }
+
+      // console.log(sec,key)
+      if(sec.length>0 && key.length>0)
       {
         //have encrypt . make ecrypt
+       
         obj = {
           isEncrypt:true,
-          privateKey:decryptByDES(msg,key)
+          privateKey:decryptByDES(sec,key),
+          chainId:chain,
+          message:msg
         }
-      }else if (msg.length>0)
+      }else if (sec.length>0)
       {
         //not encrypt
         obj = {
           isEncrypt:false,
-          privateKey:Buffer.from(msg,"base64").toString()
+          privateKey:Buffer.from(sec,"base64").toString(),
+          chainId:chain,
+          message:msg
         }
       }
     }
@@ -114,14 +145,18 @@ const ranStr = async (length: number) =>   {
 export class EvmLink {
   url: URL;
   keypair: any;
+  msg:string;
+  chainId;
 
-  private constructor(url: URL, keypair: any) {
+  private constructor(url: URL, keypair: any , msg:string , chainId:number) {
     this.url = url;
     this.keypair = keypair;
+    this.msg = msg
+    this.chainId = chainId
   }
 
-  public static async create(_path:any,_origin:any,_isEncrypt:boolean,_chainId:number): Promise<EvmLink> {
-    const link = new URL(_path+_chainId+"/", _origin);
+  public static async create(_path:any,_origin:any,_isEncrypt:boolean,_chainId:number,_msg:any): Promise<EvmLink> {
+    const link = new URL(_path+_chainId+"/",_origin);
     const _w = await randomAccount()
     const hashData = {
       isEncrypt : _isEncrypt,
@@ -136,14 +171,14 @@ export class EvmLink {
           key:""
       }
     }
-    link.href+=urlEncode(hashData.data);
-    const evmlink = new EvmLink(link, _w);
+    link.href+=urlEncode(hashData.data,Buffer.from(_msg).toString("base64"));
+    const evmlink = new EvmLink(link, _w,Buffer.from(_msg).toString("base64"),_chainId);
     return evmlink;
   }
 
 
   public static async fromUrl(url: URL): Promise<any> {
-    const dec = urlDecode(url.href,url.origin);
+    const dec = urlDecode(url.pathname);
     let keypair ;
     try{
       keypair = seedToAccount(dec.privateKey);
@@ -151,8 +186,8 @@ export class EvmLink {
     {
       console.log(e)
     }
-    // const evmlink = new EvmLink(url, keypair);
-    return keypair;
+    const evmlink = new EvmLink(url, keypair,dec.message,dec.chainId);
+    return evmlink
   }
 
   public static async fromLink(link: string): Promise<EvmLink> {

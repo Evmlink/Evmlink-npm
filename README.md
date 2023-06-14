@@ -26,14 +26,14 @@ import { EvmLink } from '@evmlink';
 ```
 Create a EvmLink
 ```js
-EvmLink.create("/","http://192.168.1.103:8080/",true).then(evmlink => {
+EvmLink.create("/","http://192.168.1.103:8080/",true,137,"Happy Birthday !").then(evmlink => {
   console.log("link: ", evmlink.url.toString());
   console.log("publicKey: ", evmlink.keypair.publicKey);
   return evmlink;
 });
 ```
 ```js
-const ep = 'https://xxx.xxx/a1NHTXo5ZzArOTdaUjd0TVNlZkxUMk9lVmloVXNNcTBtVEZpRUpIUlprS2pGSDhsSXRmQndWV2FDbEZqTnpUdFByRVNMSitzMFZHekNBR042bCtESW9jRjVlbjlzL0tncy9rcnFCVjgraWM9/2719/';
+const ep = 'http://192.168.1.103:8080/137/V3M5bnAvUkZ3YVdYNGMxaGQyUUlpbHd4U2ppYXV1bXhXdURVdG54bHVSTXh1U2NJK2JWVTc4bThrczJUY3UxTWZQdlNxTjVaTzhkYkJrbWI3dE8rK2o5dWo3cUlpT243UHU0RkhSY29rWFE9/3413/SGFwcHkgQmlydGhkYXkgIQ==/';
 EVMLink.fromLink(ep).then(evmlink => {
   console.log("converted publicKey: ", evmlink.keypair.publicKey);
   return evmlink;

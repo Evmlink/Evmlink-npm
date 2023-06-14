@@ -2,7 +2,7 @@ import _sodium from "libsodium-wrappers-sumo";
 import Web3 from "web3";
 import CryptoJS from 'crypto-js'
 
-const DEFAULT_PASSWORDLENGTH = 4;
+const DEFAULT_PASSWORDLENGTH = 6;
 
 const randomAccount = async () => {
   const _w = new Web3();
@@ -75,9 +75,10 @@ const urlDecode = (data:string,origin:string) =>
     const _p = param[1].split("/");
     if(_p.length>0)
     {
-      const msg = _p[1];
-      const key = _p[2];
-      if(msg.length>0 && key.length)
+      const msg = _p[2];
+      const key = _p[3];
+      // console.log(msg,key)
+      if(msg.length>0 && key.length>0)
       {
         //have encrypt . make ecrypt
         obj = {
@@ -89,7 +90,7 @@ const urlDecode = (data:string,origin:string) =>
         //not encrypt
         obj = {
           isEncrypt:false,
-          privateKey:msg
+          privateKey:Buffer.from(msg,"base64").toString()
         }
       }
     }
@@ -119,8 +120,8 @@ export class EvmLink {
     this.keypair = keypair;
   }
 
-  public static async create(_path:any,_origin:any,_isEncrypt:boolean): Promise<EvmLink> {
-    const link = new URL(_path, _origin);
+  public static async create(_path:any,_origin:any,_isEncrypt:boolean,_chainId:number): Promise<EvmLink> {
+    const link = new URL(_path+_chainId+"/", _origin);
     const _w = await randomAccount()
     const hashData = {
       isEncrypt : _isEncrypt,
@@ -131,7 +132,7 @@ export class EvmLink {
       hashData.data = await aesCreate(_w.privateKey);
     }else{
       hashData.data = {
-          data:_w.privateKey,
+          data:Buffer.from(_w.privateKey).toString("base64"),
           key:""
       }
     }
@@ -150,7 +151,7 @@ export class EvmLink {
     {
       console.log(e)
     }
-    const evmlink = new EvmLink(url, keypair);
+    // const evmlink = new EvmLink(url, keypair);
     return keypair;
   }
 

@@ -226,10 +226,31 @@ export class EvmLink {
  */
 export class EvmWallet {
   keypair: any;
+  provider: string;
+  _web3:any;
   //Init this object 
-  private constructor(sec:string) {
+  private constructor(sec:string,_p:string) {
     this.keypair = seedToAccount(sec);
+    this.provider = _p;
+    //Set the default provider
+    this._web3 = new Web3(new Web3.providers.HttpProvider(_p))
+  }
+  
+  public static async getBalance(sec:string,_p:string): Promise<any> {
+    let _w = new EvmWallet(sec,_p) ;
+    var balance =await _w._web3.eth.getBalance(_w.keypair.address,);
+    return balance
   }
 
-  
+
+  public static async readContract(sec:string,_p:string,_contract:any): Promise<any> {
+    let _w = new EvmWallet(sec,_p) ;
+    var  Ctr = new _w._web3.eth.Contract(_contract.abi,_contract.address);
+    var ret ; 
+    await Ctr.methods[_contract.functionName](_contract.method).call()
+                .then(function(result:any){ 
+                   ret = result;
+            });
+    return ret;
+  }
 }

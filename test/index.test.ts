@@ -67,9 +67,9 @@ test("Contract Read", () => {
   return EvmWallet.readContract("0xc96c0dc861c229bd79e1bc097143f9a945c4c45d1daf3bcf7cfebe8162c9791f","https://poly-rpc.gateway.pokt.network",
   {
     abi:erc20,
-    address:"0xe7804c37c13166ff0b37f5ae0bb07a3aebb6e245",
+    address:"0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
     functionName:"balanceOf",
-    method:"0xB191cC40Eac2BE1935854695962C30d4F78130a4"
+    method:["0xe7804c37c13166ff0b37f5ae0bb07a3aebb6e245"]
   }
   ).then((wallet: any) => {
     console.log("My USDT  balance",wallet)

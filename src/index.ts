@@ -1,18 +1,19 @@
 import Web3 from "web3";
 import CryptoJS from 'crypto-js'
 
-const DEFAULT_PASSWORDLENGTH = 4;
+const DEFAULT_PASSWORDLENGTH = 4; //The length of encryption number
 
+//To generate a totally new account
 const randomAccount = async () => {
   const _w = new Web3();
   return _w.eth.accounts.create();
 }
-
+//Recover account from seeds
 const seedToAccount = (seed:string) => {
   const _w = new Web3();
   return _w.eth.accounts.privateKeyToAccount(seed);
 }
-
+//Base encryption with CBC-Pkcs7
 const aesEncrypt = (message:any, key:any) => {
   const iv = CryptoJS.enc.Utf8.parse(key);
   key = CryptoJS.enc.Utf8.parse(key);
@@ -24,7 +25,7 @@ const aesEncrypt = (message:any, key:any) => {
     });
     return Buffer.from(encrypted.toString()).toString('base64');
 }
-
+//Base decryption with same method
 const decryptByDES = (ciphertext:any, key:any) => {
   const iv = CryptoJS.enc.Utf8.parse(key);
   key = CryptoJS.enc.Utf8.parse(key);
@@ -38,7 +39,7 @@ const decryptByDES = (ciphertext:any, key:any) => {
   const ret = (decrypted.toString(CryptoJS.enc.Utf8)).split('"');
   return ret[1]
 }
-
+//Create a init link for a random address
 const aesCreate = async (msg:any) => {
     const seed = await ranStr(DEFAULT_PASSWORDLENGTH);
     const ret =  await aesEncrypt(
@@ -54,7 +55,6 @@ const aesCreate = async (msg:any) => {
  * The rules of Url :
  * {origin}/{path}/{chainID}/{secretKey}/{Password}/{Message}
  */
-
 const urlEncode = (data:any,msg:any) =>
 {
   let str =  ''
@@ -65,8 +65,6 @@ const urlEncode = (data:any,msg:any) =>
   str+=msg+"/";
   return str;
 }
-
-
 const urlDecode = (pathname:string) =>
 {
   let obj = {
@@ -140,6 +138,28 @@ const ranStr = async (length: number) =>   {
   }
   return result;
 }
+
+/**
+ * Web3  Sign
+ */
+const signTxn = async (_w:EvmWallet,to:any,tx:any) => {
+  const gas = await tx.estimateGas({from: _w.keypair.address});
+  const gasPrice = (await _w._web3.eth.getGasPrice());
+  const data = tx.encodeABI();
+  const nonce = await _w._web3.eth.getTransactionCount(_w.keypair.address);
+  return await _w._web3.eth.accounts.signTransaction(
+      {
+        to: to, 
+        data,
+        gas,
+        gasPrice,
+        nonce, 
+        chainId: _w.chainId
+      },
+      _w.keypair.privateKey
+    );
+}
+
 
  /**
   * EVMLINK Class 
@@ -227,30 +247,41 @@ export class EvmLink {
 export class EvmWallet {
   keypair: any;
   provider: string;
+  chainId:number;
   _web3:any;
   //Init this object 
-  private constructor(sec:string,_p:string) {
+  private constructor(sec:string,_p:string,_c:number) {
     this.keypair = seedToAccount(sec);
     this.provider = _p;
+    this.chainId = _c;
     //Set the default provider
     this._web3 = new Web3(new Web3.providers.HttpProvider(_p))
   }
   
-  public static async getBalance(sec:string,_p:string): Promise<any> {
-    let _w = new EvmWallet(sec,_p) ;
+  public static async getBalance(sec:string,_p:string,_c:number): Promise<any> {
+    let _w = new EvmWallet(sec,_p,_c) ;
     var balance =await _w._web3.eth.getBalance(_w.keypair.address,);
     return balance
   }
 
 
-  public static async readContract(sec:string,_p:string,_contract:any): Promise<any> {
-    let _w = new EvmWallet(sec,_p) ;
+  public static async readContract(sec:string,_p:string,_c:number,_contract:any): Promise<any> {
+    let _w = new EvmWallet(sec,_p,_c) ;
     var  Ctr = new _w._web3.eth.Contract(_contract.abi,_contract.address);
     var ret ; 
-    await Ctr.methods[_contract.functionName](_contract.method).call()
+    await Ctr.methods[_contract.functionName](..._contract.method).call()
                 .then(function(result:any){ 
                    ret = result;
             });
     return ret;
+  }
+
+  public static async writeContract(sec:string,_p:string,_c:number,_contract:any): Promise<any> {
+    let _w = new EvmWallet(sec,_p,_c) ;
+    const  Ctr = new _w._web3.eth.Contract(_contract.abi,_contract.address);
+    const tx = Ctr.methods[_contract.functionName](..._contract.method);
+    const signedTx = await signTxn(_w,_contract.address,tx);
+    const receipt = await _w._web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    return receipt;
   }
 }

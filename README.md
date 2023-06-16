@@ -1,6 +1,6 @@
 # EvmLink Npm
 
-This repo is frok from [Tiplik Api](https://github.com/TipLink/tiplink-api) , [Origin Documentation](https://docs.tiplink.io)
+This idea is frok from [Tiplik Api](https://github.com/TipLink/tiplink-api) , [Origin Documentation](https://docs.tiplink.io)
 
 ## Feature
 
@@ -47,3 +47,31 @@ EVMLink.fromLink(ep).then(evmlink => {
   return evmlink;
 });
 ```
+
+# What is EvmWallt ?
+
+EvmWallet is a Class that allows you to use link-base-wallet like extension wallet (like metamask).
+
+## Feature
+
+- Init the account with web3js
+
+- Balance of account 
+
+- Transfer network token
+
+- Basical contract call
+
+- Basical contract send
+
+- Basical contract send with payable
+
+- Erc20 Token Groups
+  - Erc20 balanceOf
+  - Erc20 approve
+  - Erc20 transfer
+  - Erc20 transferFrom
+
+# How to use EvmWallet
+
+

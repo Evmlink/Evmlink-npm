@@ -277,14 +277,13 @@ export class EvmWallet {
     //Set the default provider
     this._web3 = new Web3(new Web3.providers.HttpProvider(_p))
   }
-  
+  //Get balance of this address
   public static async getBalance(sec:string,_p:string,_c:number): Promise<any> {
     let _w = new EvmWallet(sec,_p,_c) ;
     var balance =await _w._web3.eth.getBalance(_w.keypair.address,);
     return balance
   }
-
-
+  //Do contract call
   public static async readContract(sec:string,_p:string,_c:number,_contract:any): Promise<any> {
     let _w = new EvmWallet(sec,_p,_c) ;
     var  Ctr = new _w._web3.eth.Contract(_contract.abi,_contract.address);
@@ -295,7 +294,7 @@ export class EvmWallet {
             });
     return ret;
   }
-
+  //Do contract send
   public static async writeContract(sec:string,_p:string,_c:number,_contract:any): Promise<any> {
     let _w = new EvmWallet(sec,_p,_c) ;
     const  Ctr = new _w._web3.eth.Contract(_contract.abi,_contract.address);

@@ -128,7 +128,7 @@ const urlDecode = (pathname:string) =>
   }
   return obj;
 }
-
+//Random Number String
 const ranStr = async (length: number) =>   {
   let result = '';
   const characters = '0123456789';
@@ -141,20 +141,34 @@ const ranStr = async (length: number) =>   {
   return result;
 }
 
-
+ /**
+  * EVMLINK Class 
+  * 
+  * - Create new wallet in link
+  * - Recover wallet by link
+  */
 export class EvmLink {
   url: URL;
   keypair: any;
   msg:string;
   chainId;
-
+  //Init this object 
   private constructor(url: URL, keypair: any , msg:string , chainId:number) {
     this.url = url;
     this.keypair = keypair;
     this.msg = msg
     this.chainId = chainId
   }
-
+  /**
+   * Create a new wallet | new link
+   * 
+   * @param _path 
+   * @param _origin 
+   * @param _isEncrypt 
+   * @param _chainId 
+   * @param _msg 
+   * @returns 
+   */
   public static async create(_path:any,_origin:any,_isEncrypt:boolean,_chainId:number,_msg:any): Promise<EvmLink> {
     const link = new URL(_path+_chainId+"/",_origin);
     const _w = await randomAccount()
@@ -176,7 +190,12 @@ export class EvmLink {
     return evmlink;
   }
 
-
+  /**
+   * Recover from url
+   * 
+   * @param url 
+   * @returns 
+   */
   public static async fromUrl(url: URL): Promise<any> {
     const dec = urlDecode(url.pathname);
     let keypair ;
@@ -189,10 +208,28 @@ export class EvmLink {
     const evmlink = new EvmLink(url, keypair,dec.message,dec.chainId);
     return evmlink
   }
-
   public static async fromLink(link: string): Promise<EvmLink> {
     const url = new URL(link);
     return this.fromUrl(url);
   }
+
+
 }
 
+/**
+ * EvmWallet model . To make a stander web base wallet
+   * Wallet Model : 
+   *  - Make this thing work like a fornt-end wallet 
+   *  - Add contract call if nessary
+   *  - Add signature 
+   *  - Avoid input private key (But not likly possible)
+ */
+export class EvmWallet {
+  keypair: any;
+  //Init this object 
+  private constructor(sec:string) {
+    this.keypair = seedToAccount(sec);
+  }
+
+  
+}

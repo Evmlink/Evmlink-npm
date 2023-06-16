@@ -279,15 +279,14 @@ export class EvmWallet {
   }
   //Get balance of this address
   public static async getBalance(sec:string,_p:string,_c:number): Promise<any> {
-    let _w = new EvmWallet(sec,_p,_c) ;
-    var balance =await _w._web3.eth.getBalance(_w.keypair.address,);
-    return balance
+    const _w = new EvmWallet(sec,_p,_c) ;
+    return await _w._web3.eth.getBalance(_w.keypair.address,);
   }
   //Do contract call
   public static async readContract(sec:string,_p:string,_c:number,_contract:any): Promise<any> {
-    let _w = new EvmWallet(sec,_p,_c) ;
-    var  Ctr = new _w._web3.eth.Contract(_contract.abi,_contract.address);
-    var ret ; 
+    const _w = new EvmWallet(sec,_p,_c) ;
+    const Ctr = new _w._web3.eth.Contract(_contract.abi,_contract.address);
+    let ret ; 
     await Ctr.methods[_contract.functionName](..._contract.method).call()
                 .then(function(result:any){ 
                    ret = result;
@@ -296,7 +295,7 @@ export class EvmWallet {
   }
   //Do contract send
   public static async writeContract(sec:string,_p:string,_c:number,_contract:any): Promise<any> {
-    let _w = new EvmWallet(sec,_p,_c) ;
+    const _w = new EvmWallet(sec,_p,_c) ;
     const  Ctr = new _w._web3.eth.Contract(_contract.abi,_contract.address);
     const tx = Ctr.methods[_contract.functionName](..._contract.method);
     let _signedTx;

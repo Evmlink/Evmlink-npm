@@ -149,7 +149,7 @@ const signTxn = async (_w:EvmWallet,to:any,tx:any) => {
   const nonce = await _w._web3.eth.getTransactionCount(_w.keypair.address);
   return await _w._web3.eth.accounts.signTransaction(
       {
-        to: to, 
+        to: to.address, 
         data,
         gas,
         gasPrice,
@@ -159,6 +159,26 @@ const signTxn = async (_w:EvmWallet,to:any,tx:any) => {
       _w.keypair.privateKey
     );
 }
+
+const signTxnValue = async (_w:EvmWallet,to:any,tx:any) => {
+  const gas = await tx.estimateGas({values:to.value, from: _w.keypair.address});
+  const gasPrice = (await _w._web3.eth.getGasPrice());
+  const data = tx.encodeABI();
+  const nonce = await _w._web3.eth.getTransactionCount(_w.keypair.address);
+  return await _w._web3.eth.accounts.signTransaction(
+      {
+        to: to.address, 
+        value:to.values,
+        data,
+        gas,
+        gasPrice,
+        nonce, 
+        chainId: _w.chainId
+      },
+      _w.keypair.privateKey
+    );
+}
+
 
 
  /**
@@ -280,8 +300,14 @@ export class EvmWallet {
     let _w = new EvmWallet(sec,_p,_c) ;
     const  Ctr = new _w._web3.eth.Contract(_contract.abi,_contract.address);
     const tx = Ctr.methods[_contract.functionName](..._contract.method);
-    const signedTx = await signTxn(_w,_contract.address,tx);
-    const receipt = await _w._web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    let _signedTx;
+    if(_contract.value>0)
+    {
+      _signedTx = await signTxnValue(_w,_contract,tx);
+    }else{
+      _signedTx = await signTxn(_w,_contract,tx);
+    }
+    const receipt = await _w._web3.eth.sendSignedTransaction(_signedTx.rawTransaction);
     return receipt;
   }
 }
